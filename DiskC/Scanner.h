@@ -29,9 +29,7 @@ public:
     size_t GetTotalScannedFolders() const;
     std::wstring GetCurrentPath() const;
 
-    static const UINT WM_SCAN_PROGRESS;
-    static const UINT WM_SCAN_COMPLETE;
-    static const UINT WM_SCAN_ENTRY;
+    enum { WM_SCAN_PROGRESS = WM_APP + 1, WM_SCAN_COMPLETE = WM_APP + 2, WM_SCAN_ENTRY = WM_APP + 3 };
 
 private:
     static DWORD WINAPI ScanThreadProc(LPVOID param);

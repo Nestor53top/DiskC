@@ -1,10 +1,6 @@
 #include "Scanner.h"
 #include "SystemProtector.h"
 
-const UINT Scanner::WM_SCAN_PROGRESS = WM_APP + 1;
-const UINT Scanner::WM_SCAN_COMPLETE = WM_APP + 2;
-const UINT Scanner::WM_SCAN_ENTRY = WM_APP + 3;
-
 Scanner::Scanner()
     : m_hThread(NULL), m_hPauseEvent(NULL), m_cancelled(false),
       m_paused(false), m_scanning(false), m_hNotifyWnd(NULL),

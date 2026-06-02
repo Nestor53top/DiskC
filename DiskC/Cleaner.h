@@ -26,8 +26,7 @@ public:
     bool IsCleaning() const;
     CleanResult GetResult() const;
 
-    static const UINT WM_CLEAN_PROGRESS;
-    static const UINT WM_CLEAN_COMPLETE;
+    enum { WM_CLEAN_PROGRESS = WM_APP + 10, WM_CLEAN_COMPLETE = WM_APP + 11 };
 
     static std::vector<std::wstring> GetTempPatterns(CleanMode mode);
     static bool IsTempFile(const std::wstring& path, CleanMode mode);

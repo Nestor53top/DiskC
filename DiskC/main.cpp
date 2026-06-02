@@ -228,16 +228,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             LVCOLUMNW lvc = { 0 };
             lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
             lvc.cx = 280;
-            lvc.pszText = L"Folder Path";
+            lvc.pszText = const_cast<LPWSTR>(L"Folder Path");
             ListView_InsertColumn(g_hListFolders, 0, &lvc);
             lvc.cx = 100;
-            lvc.pszText = L"Size";
+            lvc.pszText = const_cast<LPWSTR>(L"Size");
             ListView_InsertColumn(g_hListFolders, 1, &lvc);
             lvc.cx = 70;
-            lvc.pszText = L"Files";
+            lvc.pszText = const_cast<LPWSTR>(L"Files");
             ListView_InsertColumn(g_hListFolders, 2, &lvc);
             lvc.cx = 80;
-            lvc.pszText = L"Type";
+            lvc.pszText = const_cast<LPWSTR>(L"Type");
             ListView_InsertColumn(g_hListFolders, 3, &lvc);
             ListView_SetExtendedListViewStyle(g_hListFolders,
                 LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_GRIDLINES);

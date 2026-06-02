@@ -18,9 +18,11 @@ std::vector<std::wstring> SystemProtector::GetProtectedDirs() {
 
 bool SystemProtector::IsSystemDriveRoot(const std::wstring& path) {
     wchar_t root[4] = { path[0], L':', L'\\', 0 };
+    std::wstring driveColon = std::wstring(1, path[0]) + L":";
+    std::wstring driveSlash = std::wstring(1, path[0]) + L":/";
     return (_wcsicmp(path.c_str(), root) == 0) ||
-           (_wcsicmp(path.c_str(), std::wstring(1, path[0]) + L":") == 0) ||
-           (_wcsicmp(path.c_str(), std::wstring(1, path[0]) + L":/") == 0);
+           (_wcsicmp(path.c_str(), driveColon.c_str()) == 0) ||
+           (_wcsicmp(path.c_str(), driveSlash.c_str()) == 0);
 }
 
 std::vector<std::wstring> SystemProtector::GetSystemRootDirs() {

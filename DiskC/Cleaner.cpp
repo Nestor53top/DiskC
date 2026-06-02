@@ -1,9 +1,6 @@
 #include "Cleaner.h"
 #include "SystemProtector.h"
 
-const UINT Cleaner::WM_CLEAN_PROGRESS = WM_APP + 10;
-const UINT Cleaner::WM_CLEAN_COMPLETE = WM_APP + 11;
-
 Cleaner::Cleaner() : m_hThread(NULL), m_cancelled(false), m_cleaning(false),
                      m_hNotifyWnd(NULL), m_notifyMsg(0) {
     ZeroMemory(&m_result, sizeof(m_result));

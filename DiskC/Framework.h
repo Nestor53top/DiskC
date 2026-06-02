@@ -1,5 +1,6 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
+#define _CRT_NON_CONFORMING_SWPRINTFS
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
