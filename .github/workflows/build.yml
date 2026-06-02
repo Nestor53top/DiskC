@@ -53,17 +53,17 @@ jobs:
 
       - name: Generate Gradle wrapper
         run: |
-          cd DiskC/Mobile
+          cd Mobile
           gradle wrapper --gradle-version 8.2
 
       - name: Build Debug APK
         run: |
-          cd DiskC/Mobile
+          cd Mobile
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DiskC-Mobile-Debug
-          path: DiskC/Mobile/app/build/outputs/apk/debug/*.apk
+          path: Mobile/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
