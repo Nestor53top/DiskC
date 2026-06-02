@@ -5,6 +5,8 @@
 #include <commdlg.h>
 #include <shellapi.h>
 #include <shlwapi.h>
+#include <shlobj.h>
+#include <objbase.h>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -16,3 +18,4 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "ole32.lib")

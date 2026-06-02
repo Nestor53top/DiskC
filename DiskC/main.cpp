@@ -254,7 +254,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                 290, 390, 130, 30, hWnd, (HMENU)IDC_BTN_DEEPCLEAN, hInst, NULL);
 
-            g_hProgress = CreateWindowW(PROGRESS_CLASSW, L"",
+            g_hProgress = CreateWindowW(PROGRESS_CLASS, L"",
                 WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
                 10, 430, 580, 20, hWnd, (HMENU)IDC_PROGRESS, hInst, NULL);
 
@@ -308,19 +308,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
                 case IDC_BTN_DEEPCLEAN:
                     DoDeepClean();
-                    break;
-
-                case IDC_LIST_FOLDERS:
-                    if (HIWORD(wParam) == LBN_SELCHANGE ||
-                        HIWORD(wParam) == LVN_ITEMCHANGED) {
-                        std::wstring selPath = GetSelectedPath();
-                        if (!selPath.empty()) {
-                            SetWindowTextW(g_hStaticPath, selPath.c_str());
-                            EnableWindow(g_hBtnDelete, TRUE);
-                            EnableWindow(g_hBtnClean, TRUE);
-                            EnableWindow(g_hBtnDeepClean, TRUE);
-                        }
-                    }
                     break;
 
                 case 40000:
