@@ -64,7 +64,7 @@ void UpdateListView() {
                              (LPWSTR)std::to_wstring(entry.fileCount).c_str());
         ListView_SetItemText(g_hListFolders, idx, 3,
                              (LPWSTR)(entry.isProtected ? L"Protected" :
-                                      entry.isSystem ? L"System" : L"User").c_str());
+                                      entry.isSystem ? L"System" : L"User"));
 
         idx++;
     }
