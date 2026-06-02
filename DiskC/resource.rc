@@ -1,0 +1,20 @@
+#include "resource.h"
+
+IDI_ICON1               ICON                    "DiskC.ico"
+
+IDR_MENU1 MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                    40000
+    END
+    POPUP "&Action"
+    BEGIN
+        MENUITEM "&Scan",                    IDC_BTN_SCAN
+        MENUITEM "&Delete Selected",         IDC_BTN_DELETE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                   40001
+    END
+END
