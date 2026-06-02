@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval';">
+<title>DiskC Mobile</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;outline:none}
+body{background:#1a1a2e;font:16px/1.4 'Segoe UI',Roboto,sans-serif;color:#e0e0e0;padding:0;overflow-x:hidden}
+#app{padding:12px;max-width:100%}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.header .icon{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#4fc3f7,#1565c0);flex-shrink:0}
+.header h1{font-size:18px;font-weight:700}
+.toolbar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.toolbar input[type=text]{flex:1;min-width:0;padding:12px 10px;border:1px solid #3a3a5c;border-radius:6px;background:#1a1a2e;color:#e0e0e0;font:15px monospace}
+.btn{display:flex;align-items:center;justify-content:center;padding:12px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;transition:.15s;white-space:nowrap}
+.btn-scan{background:#1565c0;color:#fff;flex-shrink:0}.btn-scan:active{background:#0d47a1}.btn-scan.scanning{background:#f57c00}
+.btn-browse{background:#37474f;color:#fff;flex-shrink:0;padding:12px 16px}.btn-browse:active{background:#263238}
+.btn-row{display:flex;gap:6px;margin-bottom:10px}
+.btn-row .btn{flex:1;text-align:center;font-size:13px;padding:12px 6px}
+.btn-del{background:#c62828;color:#fff}.btn-del:active{background:#b71c1c}.btn-del:disabled,.btn-clean:disabled,.btn-deep:disabled{background:#424242;color:#666}
+.btn-clean{background:#2e7d32;color:#fff}.btn-clean:active{background:#1b5e20}
+.btn-deep{background:#6a1b9a;color:#fff}.btn-deep:active{background:#4a148c}
+.scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:10px;border:1px solid #3a3a5c;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+thead{background:#1e1e36}
+th{padding:10px 8px;text-align:left;font-weight:600;border-bottom:1px solid #3a3a5c;cursor:pointer;white-space:nowrap;position:sticky;top:0;background:#1e1e36}
+th:active{color:#4fc3f7}
+th.sort-asc::after{content:' ▲';font-size:10px}
+th.sort-desc::after{content:' ▼';font-size:10px}
+tbody tr{cursor:pointer}
+tbody tr:active{background:#2e2e4a}
+tbody tr.selected{background:#1e3a5f;border-left:3px solid #4fc3f7}
+td{padding:10px 8px;border-bottom:1px solid #2a2a44;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td:first-child{max-width:200px}
+.type-badge{font-weight:700;font-size:11px;padding:2px 6px;border-radius:3px}
+.type-Protected{color:#ef5350}
+.type-System{color:#ffa726}
+.type-User{color:#66bb6a}
+.progress-wrap{height:14px;background:#1a1a2e;border-radius:6px;border:1px solid #3a3a5c;margin-bottom:8px;overflow:hidden;position:relative}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#1565c0,#4fc3f7);border-radius:6px;transition:width .3s}
+.progress-wrap.marquee .progress-bar{width:25%;animation:marquee 1s ease-in-out infinite}
+@keyframes marquee{0%{transform:translateX(-100%)}100%{transform:translateX(500%)}}
+.status{background:#1e1e36;padding:10px 12px;border-radius:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.status .right{color:#888;font-size:12px;text-align:right;flex-shrink:0}
+.protected-popup{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center}
+.protected-popup.show{display:flex}
+.popup-box{background:#252540;border:2px solid #c62828;border-radius:12px;padding:24px;margin:20px;max-width:360px;box-shadow:0 8px 40px #000}
+.popup-box h3{color:#ef5350;margin-bottom:8px;font-size:18px}
+.popup-box p{margin-bottom:16px;color:#bbb;font-size:14px;word-break:break-word}
+.popup-box .btn{background:#c62828;color:#fff;width:100%;padding:14px}
+.confirm-popup{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center}
+.confirm-popup.show{display:flex}
+.confirm-box{background:#252540;border:1px solid #555;border-radius:12px;padding:24px;margin:20px;max-width:380px;box-shadow:0 8px 40px #000}
+.confirm-box h3{margin-bottom:8px;font-size:18px}
+.confirm-box p{margin-bottom:16px;color:#bbb;font-size:14px;word-break:break-word}
+.confirm-box .actions{display:flex;gap:8px}
+.confirm-box .actions .btn{flex:1;padding:14px;font-size:16px}
+.btn-yes{background:#c62828;color:#fff}
+.btn-no{background:#555;color:#fff}
+.toast{position:fixed;bottom:30px;left:20px;right:20px;background:#323232;color:#fff;padding:14px 20px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:2000;text-align:center}
+.toast.show{opacity:1}
+.note{text-align:center;font-size:11px;color:#555;margin-top:12px}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <div class="icon"></div>
+    <h1>DiskC Mobile</h1>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="pathInput" value="C:\">
+    <button class="btn btn-scan" id="btnScan" onclick="startScan()">Scan</button>
+    <button class="btn btn-browse" onclick="browse()">...</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-del" id="btnDel" disabled onclick="doDelete()">Delete</button>
+    <button class="btn btn-clean" id="btnClean" disabled onclick="doClean()">Clean</button>
+    <button class="btn btn-deep" id="btnDeep" disabled onclick="doDeep()">Deep</button>
+  </div>
+
+  <div class="scroll-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy(0)" id="th0">Folder</th>
+          <th onclick="sortBy(1)" id="th1">Size</th>
+          <th onclick="sortBy(2)" id="th2">Files</th>
+          <th onclick="sortBy(3)" id="th3">Type</th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="status">
+    <span id="statusText">Ready</span>
+    <span class="right" id="statusInfo"></span>
+  </div>
+  <div class="note">DiskC Mobile v1.0 — Smart Disk Cleaner</div>
+</div>
+
+<div class="protected-popup" id="protectedPopup">
+  <div class="popup-box">
+    <h3>Protected Path</h3>
+    <p id="protectedMsg">This folder is protected and cannot be modified.</p>
+    <button class="btn" onclick="closeProtected()">OK</button>
+  </div>
+</div>
+
+<div class="confirm-popup" id="confirmPopup">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Confirm</h3>
+    <p id="confirmMsg"></p>
+    <div class="actions">
+      <button class="btn btn-no" onclick="closeConfirm()">No</button>
+      <button class="btn btn-yes" id="confirmYesBtn" onclick="confirmAction()">Yes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PROTECTED_DIRS = [
+  'C:\\Windows','C:\\Windows\\System32','C:\\Windows\\SysWOW64',
+  'C:\\Program Files','C:\\Program Files (x86)','C:\\ProgramData',
+  'C:\\System Volume Information','C:\\$Recycle.Bin','C:\\$WinREAgent',
+  'C:\\boot','C:\\Windows\\Boot','C:\\Windows\\WinSxS',
+  'C:\\Windows\\Installer','C:\\Windows\\assembly','C:\\Windows\\Microsoft.NET',
+  'C:\\Windows\\Fonts','C:\\Users\\Default','C:\\Users\\All Users',
+  'C:\\Documents and Settings'
+];
+
+const FAKE_ENTRIES = [
+  {path:'C:\\Users\\User\\AppData\\Local\\Temp',size:1523488768,files:342,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache',size:489256432,files:2107,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Microsoft\\Windows\\INetCache',size:234567890,files:890,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Spotify\\Data',size:1123456789,files:56,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Discord\\Cache',size:345678901,files:1204,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\Downloads',size:2890123456,files:315,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\Documents',size:1234567890,files:178,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\Desktop',size:23456789,files:42,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\.npm\\_cacache',size:567890123,files:8923,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\slack\\Cache',size:123456789,files:456,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Microsoft\\Teams\\old_media',size:234567890,files:234,isProtected:false,isSystem:false},
+  {path:'C:\\Windows\\Temp',size:987654321,files:567,isProtected:true,isSystem:true},
+  {path:'C:\\Windows\\Prefetch',size:45678901,files:234,isProtected:true,isSystem:true},
+  {path:'C:\\Windows\\Logs',size:123456789,files:890,isProtected:true,isSystem:true},
+  {path:'C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive',size:345678901,files:1234,isProtected:true,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\CrashDumps',size:2345678901,files:45,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Microsoft\\OneDrive\\logs',size:56789012,files:345,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Microsoft\\Terminal Server Client\\Cache',size:23456789,files:67,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Local\\Microsoft\\Windows\\WER',size:456789012,files:5678,isProtected:false,isSystem:false},
+  {path:'C:\\Users\\User\\AppData\\Roaming\\Microsoft\\Windows\\Recent',size:12345678,files:234,isProtected:false,isSystem:false}
+];
+
+let entries = [], filtered = [], selectedPath = null, isScanning = false, sortCol = -1, sortAsc = true, pendingAction = null;
+
+function formatSize(b){return b>=1073741824?(b/1073741824).toFixed(2)+' GB':b>=1048576?(b/1048576).toFixed(2)+' MB':b>=1024?(b/1024).toFixed(2)+' KB':b+' B'}
+
+function isProtectedDir(p){return PROTECTED_DIRS.some(d=>p.toUpperCase().startsWith(d.toUpperCase()))}
+function isSafeToDelete(p){return!isProtectedDir(p)}
+function isSafeToClean(p){return!PROTECTED_DIRS.some(d=>{const u=p.toUpperCase(),du=d.toUpperCase();return u===du||u.startsWith(du+'\\')})}
+
+function setStatus(t,i){document.getElementById('statusText').textContent=t;document.getElementById('statusInfo').textContent=i||''}
+function progressMarquee(on){document.getElementById('progressWrap').classList.toggle('marquee',on)}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+function showProtected(m){document.getElementById('protectedMsg').textContent=m;document.getElementById('protectedPopup').classList.add('show')}
+function closeProtected(){document.getElementById('protectedPopup').classList.remove('show')}
+
+function showConfirm(t,m,a){pendingAction=a;document.getElementById('confirmTitle').textContent=t;document.getElementById('confirmMsg').textContent=m;document.getElementById('confirmPopup').classList.add('show')}
+function closeConfirm(){document.getElementById('confirmPopup').classList.remove('show');pendingAction=null}
+function confirmAction(){closeConfirm();if(pendingAction) pendingAction()}
+
+function browse(){const p=['C:\\','C:\\Users\\User\\Downloads','C:\\Users\\User\\Documents','C:\\Users\\User\\Desktop','C:\\Users\\User\\AppData\\Local\\Temp','C:\\Windows\\Temp'][Math.floor(Math.random()*6)];document.getElementById('pathInput').value=p;toast('Selected: '+p)}
+
+function startScan(){if(isScanning){cancelScan();return}
+isScanning=true;const btn=document.getElementById('btnScan');btn.textContent='Stop';btn.classList.add('scanning')
+progressMarquee(true);setStatus('Scanning...','')
+document.getElementById('listBody').innerHTML='';entries=[];filtered=[];selectedPath=null
+document.getElementById('btnDel').disabled=document.getElementById('btnClean').disabled=document.getElementById('btnDeep').disabled=true
+let i=0;const total=FAKE_ENTRIES.length
+function addNext(){if(!isScanning)return;if(i>=total){finishScan();return}
+entries.push({...FAKE_ENTRIES[i]});i++
+const pct=Math.round(i/total*100);document.getElementById('progressBar').style.width=pct+'%'
+setStatus('Scanning... ('+i+'/'+total+')',formatSize(entries.reduce((a,e)=>a+e.size,0)))
+setTimeout(addNext,60+Math.random()*100)}
+addNext()}
+
+function cancelScan(){isScanning=false;progressMarquee(false);document.getElementById('progressBar').style.width='0%'
+document.getElementById('btnScan').textContent='Scan';document.getElementById('btnScan').classList.remove('scanning')
+setStatus('Scan cancelled','')}
+
+function finishScan(){isScanning=false;progressMarquee(false);document.getElementById('btnScan').textContent='Scan'
+document.getElementById('btnScan').classList.remove('scanning')
+renderList();const ts=entries.reduce((a,e)=>a+e.size,0);setStatus('Scan complete — '+entries.length+' folders',formatSize(ts))
+toast('Scan complete: '+entries.length+' folders')}
+
+function renderList(){let data=[...entries]
+if(sortCol>=0)data.sort((a,b)=>{let va,vb
+if(sortCol===0){va=a.path.toUpperCase();vb=b.path.toUpperCase()}else if(sortCol===1){va=a.size;vb=b.size}else if(sortCol===2){va=a.files;vb=b.files}else{va=a.isProtected?3:a.isSystem?2:1;vb=b.isProtected?3:b.isSystem?2:1}
+return va<vb?sortAsc?-1:1:va>vb?sortAsc?1:-1:0})
+filtered=data;const tbody=document.getElementById('listBody');tbody.innerHTML=''
+data.forEach(e=>{const tr=document.createElement('tr');tr.dataset.path=e.path
+const t=e.isProtected?'Protected':e.isSystem?'System':'User'
+tr.innerHTML='<td>'+esc(e.path)+'</td><td>'+formatSize(e.size)+'</td><td>'+e.files.toLocaleString()+'</td><td class="type-badge type-'+t+'">'+t+'</td>'
+tr.onclick=function(){document.querySelectorAll('#listBody tr').forEach(r=>r.classList.remove('selected'));this.classList.add('selected');selectedPath=this.dataset.path
+const entry=entries.find(x=>x.path===selectedPath)
+document.getElementById('btnDel').disabled=!(entry&&isSafeToDelete(selectedPath))
+document.getElementById('btnClean').disabled=document.getElementById('btnDeep').disabled=false}
+tbody.appendChild(tr)})}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function sortBy(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true}
+document.querySelectorAll('th').forEach((th,i)=>{th.classList.remove('sort-asc','sort-desc');if(i===col)th.classList.add(sortAsc?'sort-asc':'sort-desc')})
+renderList()}
+
+function getSelectedEntry(){if(!selectedPath){toast('No folder selected');return null};return entries.find(e=>e.path===selectedPath)}
+
+function doDelete(){const e=getSelectedEntry();if(!e)return
+if(!isSafeToDelete(e.path)){showProtected(e.path+'\n\nThis folder is protected and cannot be deleted.');return}
+showConfirm('Delete Folder','Delete "'+e.path+'"?\n\nThis will permanently remove this folder and all contents.',()=>runCleanAction(e,'DeleteFolder'))}
+
+function doClean(){const e=getSelectedEntry();if(!e)return
+if(!isSafeToClean(e.path)){showProtected(e.path+'\n\nCannot clean — protected system path.');return}
+showConfirm('Clean Temp','Clean "'+e.path+'"?\n\nThis will remove temporary files, logs, and caches.',()=>runCleanAction(e,'CleanTemp'))}
+
+function doDeep(){const e=getSelectedEntry();if(!e)return
+if(!isSafeToClean(e.path)){showProtected(e.path+'\n\nCannot clean — protected system path.');return}
+showConfirm('Deep Clean','Deep clean "'+e.path+'"?\n\nAggressive cleaning — removes temp files, logs, caches, dumps, and update artifacts.',()=>runCleanAction(e,'DeepClean'))}
+
+function runCleanAction(e,mode){setUIState(false);progressMarquee(true);selectedPath=null
+document.querySelectorAll('#listBody tr').forEach(r=>r.classList.remove('selected'))
+let elapsed=0;const maxT=1200+Math.random()*1800,step=50
+const label=mode==='DeleteFolder'?'Deleting':mode==='CleanTemp'?'Cleaning':'Deep cleaning'
+const tick=()=>{elapsed+=step;const pct=Math.min(Math.round(elapsed/maxT*100),100)
+document.getElementById('progressBar').style.width=pct+'%';setStatus(label+'... '+pct+'%','')
+if(elapsed>=maxT)finishAction(e,mode);else setTimeout(tick,step)}
+tick()}
+
+function finishAction(e,mode){progressMarquee(false);document.getElementById('progressBar').style.width='0%'
+const count=e.files+(mode==='DeleteFolder'?Math.floor(Math.random()*50):mode==='CleanTemp'?Math.floor(e.files*(.3+Math.random()*.4)):Math.floor(e.files*(.6+Math.random()*.35)))
+setUIState(true)
+if(mode==='DeleteFolder'){entries=entries.filter(x=>x.path!==e.path)}
+renderList()
+const action=mode==='DeleteFolder'?'deleted':'cleaned'
+setStatus(e.path+' — '+action+' ('+Math.max(1,count)+' files)','')
+toast(action.charAt(0).toUpperCase()+action.slice(1)+': '+Math.max(1,count)+' files')}
+
+function setUIState(enabled){document.getElementById('btnDel').disabled=!enabled;document.getElementById('btnClean').disabled=!enabled;document.getElementById('btnDeep').disabled=!enabled}
+
+setStatus('Ready','')
+</script>
+</body>
+</html>

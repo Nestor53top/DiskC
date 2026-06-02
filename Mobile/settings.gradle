@@ -1,0 +1,2 @@
+rootProject.name = 'DiskC'
+include ':app'
