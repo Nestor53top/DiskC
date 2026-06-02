@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'make_icon.py'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        platform: [x64, Win32]
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build DiskC
+        run: |
+          msbuild DiskC.sln /p:Platform=${{ matrix.platform }} /p:Configuration=${{ matrix.configuration }} /m
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiskC-${{ matrix.platform }}-${{ matrix.configuration }}
+          path: bin/${{ matrix.platform == 'Win32' && 'x86' || 'x64' }}/${{ matrix.configuration }}/
+          if-no-files-found: warn
